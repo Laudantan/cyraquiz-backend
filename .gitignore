@@ -1,0 +1,12 @@
+# Dependencias (pesan muchísimo)
+node_modules/
+
+# Variables de entorno (SECRETOS)
+.env
+
+# Archivos temporales de subida
+uploads/
+
+# Archivos basura del sistema
+.DS_Store
+Thumbs.db
