@@ -15,7 +15,11 @@ const OpenAI = require("openai");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "https://cyraquiz.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/quizzes', quizRoutes);
@@ -301,7 +305,4 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
   }
 });
 
-const PORT = 4000;
-server.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 4000;
