@@ -1,6 +1,8 @@
 console.log("🔥 VERSIÓN NUEVA CARGADA - SI LEES ESTO, YA FUNCIONA");
 
-require("dotenv").config();
+if (process.env.NODE_ENV !== 'production') {
+  require("dotenv").config();
+}
 const authRoutes = require('./routes/auth');
 const quizRoutes = require('./routes/quizzes');
 const express = require("express");
