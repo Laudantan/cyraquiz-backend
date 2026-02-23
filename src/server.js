@@ -55,7 +55,7 @@ io.on("connection", (socket) => {
   // 1. CREAR SALA (Profesor)
   socket.on("create_room", (roomCode) => {
     // Inicializamos la sala con preguntas vacías (se llenarán al iniciar)
-   rooms.set(roomCode, { players: [], currentQuestion: 0, scores: {}, answerCounts: [0, 0, 0, 0], isStarted: false });
+   rooms.set(roomCode, { players: [], currentQuestion: 0, scores: {}, answerCounts: [0, 0, 0, 0] });
     socket.join(roomCode);
     console.log(`Sala creada: ${roomCode}`);
   });
@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
   socket.on("join_room", ({ roomCode, playerName, avatar }) => {
 if (!rooms.has(roomCode)) {
        console.log(`♻️ Recuperando sala ${roomCode} para ${playerName}`);
-       rooms.set(roomCode, { players: [], currentQuestion: 0, scores: {}, answerCounts: [0, 0, 0, 0], isStarted: false});
+       rooms.set(roomCode, { players: [], currentQuestion: 0, scores: {}, answerCounts: [0, 0, 0, 0] });
     }
     if (rooms.has(roomCode)) {
       const room = rooms.get(roomCode);
@@ -85,11 +85,6 @@ if (!rooms.has(roomCode)) {
       // Avisamos al Host que alguien entró
       io.to(roomCode).emit("player_joined", { name: playerName, avatar });
       console.log(`${playerName} entró a la sala ${roomCode}`);
-      if (room.isStarted) {
-        console.log(`🏃‍♂️ ${playerName} entró tarde. Enviándolo directo al juego...`);
-        // Le mandamos la señal de "ya empezó" SOLO a este alumno para que salte el Lobby
-        io.to(socket.id).emit("game_started");
-      }
     } else {
       socket.emit("error", "Sala no encontrada");
     }
@@ -101,8 +96,6 @@ if (!rooms.has(roomCode)) {
     console.log(`🚀 Intentando iniciar juego en sala: ${roomStr}`);
 
     if (rooms.has(roomStr)) {
-      const room = rooms.get(roomStr);
-      room.isStarted = true;
       // A. AVISAR A TODOS LOS ALUMNOS (Grito General)
       // Usamos io.to() para asegurarnos que le llegue a todos los sockets en la sala
       io.to(roomStr).emit("game_started");
