@@ -20,8 +20,8 @@ router.post("/", authorization, async (req, res) => {
     res.json(newQuiz.rows[0]);
     
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Error al guardar Quiz");
+    cconsole.error("SAVE QUIZ ERROR:", err); // <- importante
+  res.status(500).json({ error: "Error al guardar Quiz" });
   }
 });
 
@@ -37,8 +37,8 @@ router.get("/", authorization, async (req, res) => {
 
     res.json(allQuizzes.rows);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Error al obtener quizzes");
+    console.error("SAVE QUIZ ERROR:", err); // <- importante
+  res.status(500).json({ error: "Error al guardar Quiz" });
   }
 });
 
