@@ -77,7 +77,8 @@ if (!rooms.has(roomCode)) {
           id: socket.id, 
           name: playerName, 
           avatar: avatar || "https://api.dicebear.com/9.x/notionists/svg?seed=default", // Default por si acaso
-          score: 0 
+          score: 0,
+          timeAccumulated: 0
         });
       }
 
@@ -117,6 +118,7 @@ if (!rooms.has(roomCode)) {
       room.currentQuestionType = question.type;
       room.currentOptions = question.options; // Guardamos las opciones para saber cuál es cuál
       room.answerCounts = [0, 0, 0, 0]; // [Votos Opción A, Votos B, Votos C, Votos D]
+      room.questionStartTime = Date.now();
     }
 
     // A los alumnos SOLO les enviamos las opciones (sin la respuesta correcta obvio)
@@ -170,9 +172,15 @@ if (!rooms.has(roomCode)) {
         isCorrect = room.currentCorrectAnswer === answer;
       }
 
+      const timeTaken = Date.now() - room.questionStartTime;
+
       // Sumar Puntos
       const pointsEarned = isCorrect ? room.currentPoints : 0;
       player.score += pointsEarned;
+
+      if (isCorrect) {
+        player.timeAccumulated += timeTaken;
+      }
 
       // Avisamos al Host (para el contador de respuestas)
       io.to(roomStr).emit("player_answered", { playerName });
@@ -199,7 +207,12 @@ socket.on("show_results", (roomCode) => {
     if (rooms.has(roomStr)) {
       const room = rooms.get(roomStr);
       // Ordenamos por puntaje de mayor a menor
-      const sortedPlayers = room.players.sort((a, b) => b.score - a.score);
+      const sortedPlayers = room.players.sort((a, b) => {
+        if (b.score === a.score) {
+          return a.timeAccumulated - b.timeAccumulated; // Desempate
+        }
+        return b.score - a.score; // Regla principal
+      });
       
       // Enviamos la lista final a TODOS (Host y Alumnos)
       io.to(roomStr).emit("final_results", sortedPlayers);
