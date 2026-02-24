@@ -243,23 +243,47 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No se subió ningún archivo PDF" });
     }
-
-    console.log("📂 Procesando archivo:", req.file.originalname);
+    
+    const usarNuevoPrompt = req.body.casillaMarcada === 'true';
+    
+    console.log("Procesando archivo:", req.file.originalname);
+    console.log("¿Usar nuevo prompt?:", usarNuevoPrompt);
 
     // 1. Leer el PDF
     const dataBuffer = fs.readFileSync(req.file.path);
     const data = await pdf(dataBuffer);
     const text = data.text;
 
-    console.log("📊 Solicitando un borrador de 2' preguntas variadas a la IA...");
+    console.log("Solicitando preguntas variadas a la IA...");
+
+    let instruccionesEspecificas = "";
+
+    if (usarNuevoPrompt) {
+      //EL NUEVO PROMPT (Modo Extracción: El PDF ya trae el examen)
+      instruccionesEspecificas = `
+      El texto proporcionado es un examen o cuestionario que YA CONTIENE preguntas y respuestas. 
+      Tu tarea es EXTRAER TODAS las preguntas que encuentres, junto con sus opciones y la respuesta correcta. 
+      NO hay límite de cantidad, extrae absolutamente todas las que vengan en el documento.
+      
+      NO inventes preguntas nuevas ni agregues información que no esté en el texto.
+      
+      Analiza el formato original de cada pregunta en el PDF y asígnale el tipo correspondiente en tu respuesta ("single" para una opción correcta, "multi" para varias correctas, o "tf" para verdadero/falso).
+      Respeta fielmente cómo vienen estructuradas en el archivo original.
+      `;
+    } else {
+      //U PROMPT ORIGINAL (Modo Generación: El PDF es teoría)
+      instruccionesEspecificas = `
+      Genera un examen de EXACTAMENTE 20 preguntas distribuidas así.
+      Mezcla los tipos de preguntas como tú creas conveniente para evaluar bien el texto.
+      `;
+    }
     
     // 3. Prompt Dinámico para los 3 Tipos
     const prompt = `
       Actúa como un profesor experto. Basado en el siguiente texto: 
-      "${text.substring(0, 60000)}"
+      "${text.substring(0, 80000)}"
 
-      Genera un examen de EXACTAMENTE 20 preguntas distribuidas así.
-      Mezcla los tipos de preguntas como tú creas conveniente para evaluar bien el texto.
+      ${instruccionesEspecificas}
 
       Reglas para los tipos de preguntas:
       1. "single" (Opción múltiple): 4 opciones en el arreglo "options". La "answer" es un string con la opción correcta.
