@@ -262,13 +262,13 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
       //EL NUEVO PROMPT (Modo Extracción: El PDF ya trae el examen)
       instruccionesEspecificas = `
       El texto proporcionado es un examen o cuestionario que YA CONTIENE preguntas y respuestas. 
-      Tu tarea es EXTRAER TODAS las preguntas que encuentres, junto con sus opciones y la respuesta correcta. 
-      NO hay límite de cantidad, extrae absolutamente todas las que vengan en el documento.
+      Tu única tarea es EXTRAER TODAS las preguntas que encuentres (pueden ser 10, 50, 70 o más). 
       
-      NO inventes preguntas nuevas ni agregues información que no esté en el texto.
-      
-      Analiza el formato original de cada pregunta en el PDF y asígnale el tipo correspondiente en tu respuesta ("single" para una opción correcta, "multi" para varias correctas, o "tf" para verdadero/falso).
-      Respeta fielmente cómo vienen estructuradas en el archivo original.
+      REGLAS ESTRICTAS PARA LA EXTRACCIÓN:
+      1. MANTÉN EL ORDEN EXACTO en el que aparecen en el documento original. Por ningún motivo las revuelvas.
+      2. EXTRAE ABSOLUTAMENTE TODAS. Si el documento tiene 65 preguntas, tu respuesta debe tener 65 preguntas. No te detengas.
+      3. NO inventes preguntas nuevas ni agregues información que no esté en el texto.
+      4. Analiza el formato original de cada pregunta en el PDF y asígnale el tipo correspondiente ("single", "multi" o "tf") respetando fielmente cómo vienen estructuradas.
       `;
     } else {
       //U PROMPT ORIGINAL (Modo Generación: El PDF es teoría)
