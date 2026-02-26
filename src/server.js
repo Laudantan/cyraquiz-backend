@@ -262,13 +262,12 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
       //EL NUEVO PROMPT (Modo Extracción: El PDF ya trae el examen)
       instruccionesEspecificas = `
       El texto proporcionado es un examen o cuestionario que YA CONTIENE preguntas y respuestas. 
-      Tu única tarea es EXTRAER TODAS las preguntas que encuentres (pueden ser 10, 50, 70 o más). 
+      Tu tarea es EXTRAER un MÁXIMO DE 40 PREGUNTAS. Si el documento tiene más, detente al llegar a 40. Si tiene menos, extrae solo las que haya.
       
       REGLAS ESTRICTAS PARA LA EXTRACCIÓN:
       1. MANTÉN EL ORDEN EXACTO en el que aparecen en el documento original. Por ningún motivo las revuelvas.
-      2. EXTRAE ABSOLUTAMENTE TODAS. Si el documento tiene 65 preguntas, tu respuesta debe tener 65 preguntas. No te detengas.
-      3. NO inventes preguntas nuevas ni agregues información que no esté en el texto.
-      4. Analiza el formato original de cada pregunta en el PDF y asígnale el tipo correspondiente ("single", "multi" o "tf") respetando fielmente cómo vienen estructuradas.
+      2. NO inventes preguntas nuevas ni agregues información que no esté en el texto.
+      3. Analiza el formato original de cada pregunta en el PDF y asígnale el tipo correspondiente ("single", "multi" o "tf") respetando fielmente cómo vienen estructuradas.
       `;
     } else {
       //U PROMPT ORIGINAL (Modo Generación: El PDF es teoría)
@@ -321,7 +320,8 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
     const completion = await deepseek.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "deepseek-chat",
-      temperature: 0.7
+      temperature: 0.7,
+      max_tokens: 8000
     });
 
     // 5. Limpiar respuesta
