@@ -1,7 +1,7 @@
-# Dependencias (pesan muchísimo)
+# Dependencias
 node_modules/
 
-# Variables de entorno (SECRETOS)
+# Variables de entorno
 .env
 
 # Archivos temporales de subida
