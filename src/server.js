@@ -75,6 +75,14 @@ if (!rooms.has(roomCode)) {
       socket.join(roomCode);
       io.to(roomCode).emit("player_joined", { name: playerName, avatar });
       console.log(`${playerName} entró a la sala ${roomCode}`);
+      if (room.isAnswering && room.currentOptions) {
+      console.log(`🚑 Rescatando a ${playerName}: Enviando pregunta en curso.`);
+      socket.emit("new_question", {
+        type: room.currentQuestionType,
+        options: room.currentOptions,
+        time: room.currentTimeLimit 
+      });
+    }
   });
 
   socket.on("start_game", (roomCode) => {
@@ -100,6 +108,8 @@ if (!rooms.has(roomCode)) {
       room.currentOptions = question.options;
       room.answerCounts = [0, 0, 0, 0]; 
       room.questionStartTime = Date.now();
+      room.currentTimeLimit = time; 
+      room.isAnswering = true;
     }
 
     io.to(roomStr).emit("new_question", { 
@@ -166,6 +176,9 @@ if (!rooms.has(roomCode)) {
   
 socket.on("show_results", (roomCode) => {
     const roomStr = roomCode.toString();
+    if (rooms.has(roomStr)) {
+      rooms.get(roomStr).isAnswering = false; 
+    }
     io.to(roomStr).emit("reveal_results");
   });
 
