@@ -60,7 +60,7 @@ if (!rooms.has(roomCode)) {
     }
     
       const room = rooms.get(roomCode);
-      const existingPlayer = room.players.find(p => p.id === socket.id);
+      const existingPlayer = room.players.find(p => p.name === playerName);
       
       if (!existingPlayer) {
         room.players.push({ 
@@ -70,13 +70,16 @@ if (!rooms.has(roomCode)) {
           score: 0,
           timeAccumulated: 0
         });
+      }else {
+        existingPlayer.id = socket.id;
+        console.log(`Jugador ${playerName} recuperó su sesión con nuevo ID.`);
       }
 
       socket.join(roomCode);
       io.to(roomCode).emit("player_joined", { name: playerName, avatar });
       console.log(`${playerName} entró a la sala ${roomCode}`);
       if (room.isAnswering && room.currentOptions) {
-      console.log(`🚑 Rescatando a ${playerName}: Enviando pregunta en curso.`);
+      console.log(`Rescatando a ${playerName}: Enviando pregunta en curso.`);
       socket.emit("new_question", {
         type: room.currentQuestionType,
         options: room.currentOptions,
